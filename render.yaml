@@ -9,8 +9,6 @@ services:
     envVars:
       - key: PORT
         value: 8000
-      - key: MODEL_VERSION
-        value: 1.0.0
       - key: SAFETY_MODE
         value: conservative
       - key: CORS_ORIGINS
