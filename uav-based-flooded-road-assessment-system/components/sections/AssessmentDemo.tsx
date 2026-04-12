@@ -115,6 +115,11 @@ const sampleImages: SampleImage[] = [
   }
 ];
 
+const DIRECT_API_URL = process.env.NEXT_PUBLIC_API_URL;
+const PREDICT_ENDPOINT = DIRECT_API_URL
+  ? `${DIRECT_API_URL.replace(/\/$/, "")}/api/v1/predict`
+  : "/api/predict";
+
 /* ============================================================
    CONFIDENCE COUNTER HOOK
    ============================================================ */
@@ -205,14 +210,23 @@ export function AssessmentDemo() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('/api/predict', {
+      const response = await fetch(PREDICT_ENDPOINT, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Prediction failed');
+        const errorText = await response.text();
+        let errorMessage = 'Prediction failed';
+
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorData.detail || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
@@ -265,14 +279,23 @@ export function AssessmentDemo() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const predictResponse = await fetch('/api/predict', {
+      const predictResponse = await fetch(PREDICT_ENDPOINT, {
         method: 'POST',
         body: formData,
       });
 
       if (!predictResponse.ok) {
-        const errorData = await predictResponse.json();
-        throw new Error(errorData.error || 'Prediction failed');
+        const errorText = await predictResponse.text();
+        let errorMessage = 'Prediction failed';
+
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorData.detail || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+
+        throw new Error(errorMessage);
       }
 
       const result = await predictResponse.json();
