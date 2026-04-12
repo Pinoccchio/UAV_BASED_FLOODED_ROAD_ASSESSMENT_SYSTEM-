@@ -11,7 +11,6 @@ import io
 from pathlib import Path
 from typing import Dict, List
 import time
-import cv2
 from .gps_extractor import GPSExtractor
 
 

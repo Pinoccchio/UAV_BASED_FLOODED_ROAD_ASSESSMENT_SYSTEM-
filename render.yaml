@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: uav-flood-api
+    runtime: docker
+    dockerfilePath: ./ml_backend/Dockerfile
+    dockerContext: ./ml_backend
+    plan: free
+    region: singapore
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: MODEL_VERSION
+        value: 1.0.0
+      - key: SAFETY_MODE
+        value: conservative
+      - key: CORS_ORIGINS
+        sync: false
+      - key: MODEL_PATH
+        value: /app/exports/run3_v2_best.onnx

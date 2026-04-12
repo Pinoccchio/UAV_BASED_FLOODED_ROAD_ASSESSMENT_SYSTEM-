@@ -31,6 +31,9 @@ frontend.log
 
 # env files
 .env*
+!.env.example
+!ml_backend/.env.example
+!uav-based-flooded-road-assessment-system/.env.example
 
 # vercel
 .vercel
@@ -45,6 +48,9 @@ ml_backend/venv/
 ml_backend/logs/
 ml_backend/checkpoints/
 ml_backend/exports/
+!ml_backend/exports/
+ml_backend/exports/*
+!ml_backend/exports/run3_v2_best.onnx
 
 # local workspace / tooling
 .agents/
