@@ -1,0 +1,7 @@
+
+Features: 
+	1. Total class: 10 ('Background':0, 'Water':1, 'Building_No_Damage':2, 'Building_Minor_Damage':3, 
+            'Building_Major_Damage':4, 'Building_Total_Destruction':5, 'Vehicle':6, 'Road-Clear':7, 'Road-Blocked':8, 'Tree':9, 'Pool':10).
+           
+	2. Total image: 4494 (Train: 3595, Val: 449, Test: 450)
+	

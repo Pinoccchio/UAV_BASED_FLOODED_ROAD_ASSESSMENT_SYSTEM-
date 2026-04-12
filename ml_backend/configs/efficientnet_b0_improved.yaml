@@ -1,0 +1,116 @@
+# EfficientNet-B0 IMPROVED Training Configuration
+# UAV Flood Passability Assessment
+# Improvements: Better class weights, more epochs, adjusted learning rates
+
+model:
+  name: efficientnet_b0
+  num_classes: 4
+  pretrained: true
+  dropout: 0.4  # Increased from 0.3 for better regularization
+  freeze_backbone: true  # Start with frozen backbone (Phase 1)
+
+data:
+  data_dir: ../data/processed
+  img_size: [448, 448]
+  batch_size: 16  # Optimized for 4GB VRAM GPU
+  num_workers: 4
+  use_weighted_sampling: true
+  pin_memory: true
+
+training:
+  # Phase 1: Train classifier head only (5 epochs - increased from 3)
+  phase1_epochs: 5
+  phase1_lr: 0.0005  # Reduced from 0.001 for stability
+
+  # Phase 2: Fine-tune last 2 blocks (15 epochs - increased from 10)
+  phase2_epochs: 15
+  phase2_lr: 0.00005  # Reduced from 0.0001
+  phase2_unfreeze_blocks: 2
+
+  # Phase 3: Full fine-tuning (20 epochs - increased from 15)
+  phase3_epochs: 20
+  phase3_lr: 0.00002  # Reduced from 0.00005
+
+  # Optimizer
+  optimizer: adamw
+  weight_decay: 0.0001
+  scheduler: cosine_annealing
+
+  # Training settings
+  max_epochs: 40  # Total across all phases (was 30)
+  warmup_epochs: 3
+  gradient_clip_val: 1.0
+  accumulate_grad_batches: 2  # Effective batch size = 32
+
+loss:
+  type: focal_loss  # Better for class imbalance
+  focal_gamma: 2.5  # Increased from 2.0 for harder focus on difficult examples
+  use_class_weights: true
+  # Aggressive class weights (impassable gets 4× weight)
+  # Based on class distribution: passable(31%), limited(35%), heavy(27%), impassable(7%)
+  class_weights: [0.6, 0.8, 1.0, 4.0]  # [passable, limited, heavy, impassable]
+
+evaluation:
+  # Metrics to track
+  metrics:
+    - accuracy
+    - f1_score_macro
+    - cohen_kappa
+    - confusion_matrix
+    - per_class_precision
+    - per_class_recall
+
+  # Validation frequency
+  check_val_every_n_epoch: 1
+  val_check_interval: 1.0  # Check validation after every epoch
+
+callbacks:
+  # Model checkpointing
+  checkpoint:
+    monitor: val/f1  # Monitor macro F1 score
+    mode: max
+    save_top_k: 5  # Increased from 3
+    save_last: true
+    filename: 'epoch{epoch:02d}-valf1{val/f1:.4f}'
+
+  # Early stopping
+  early_stopping:
+    monitor: val/f1
+    patience: 12  # Increased from 8
+    mode: max
+    min_delta: 0.001
+
+  # Learning rate monitoring
+  lr_monitor:
+    logging_interval: epoch
+
+logging:
+  # Logger type (wandb or tensorboard)
+  logger: tensorboard
+  project_name: uav-flood-assessment
+  experiment_name: efficientnet_b0_improved
+
+  # Logging frequency
+  log_every_n_steps: 10
+
+  # Log hyperparameters
+  log_hyperparameters: true
+
+  # Save directory
+  save_dir: ../logs
+
+# Hardware settings
+trainer:
+  accelerator: gpu  # Use GPU acceleration
+  devices: 1
+  precision: 16-mixed  # Use mixed precision for faster training
+  deterministic: false  # Set true for reproducibility (slower)
+
+# Reproducibility
+seed: 42
+
+# Paths
+paths:
+  checkpoint_dir: ../checkpoints
+  log_dir: ../logs
+  export_dir: ../exports

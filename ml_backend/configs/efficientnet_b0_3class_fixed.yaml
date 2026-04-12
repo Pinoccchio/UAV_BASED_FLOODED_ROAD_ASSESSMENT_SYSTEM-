@@ -1,0 +1,124 @@
+# EfficientNet-B0 3-Class Training Configuration (FIXED CLASS WEIGHTS)
+# UAV Flood Passability Assessment - Run #4
+# Classes (alphabetical): impassable, limited_passability, passable
+# Target: 80-85% test accuracy
+
+model:
+  name: efficientnet_b0
+  num_classes: 3
+  pretrained: true
+  dropout: 0.5  # Strong regularization
+  freeze_backbone: true  # Start with frozen backbone (Phase 1)
+
+data:
+  data_dir: ../data/processed
+  img_size: [448, 448]
+  batch_size: 16  # Optimized for 4GB VRAM GPU
+  num_workers: 4
+  use_weighted_sampling: true
+  pin_memory: true
+
+training:
+  # Phase 1: Train classifier head only (5 epochs)
+  phase1_epochs: 5
+  phase1_lr: 0.0005  # Conservative LR for stability
+
+  # Phase 2: Fine-tune last 2 blocks (20 epochs)
+  phase2_epochs: 20
+  phase2_lr: 0.00005  # Very conservative for fine-tuning
+  phase2_unfreeze_blocks: 2
+
+  # Phase 3: Full fine-tuning (25 epochs)
+  phase3_epochs: 25
+  phase3_lr: 0.00002  # Ultra-conservative for full fine-tuning
+
+  # Optimizer
+  optimizer: adamw
+  weight_decay: 0.0001
+  scheduler: cosine_annealing
+
+  # Training settings
+  max_epochs: 50  # Total: 5 + 20 + 25 = 50 epochs
+  warmup_epochs: 3
+  gradient_clip_val: 1.0
+  accumulate_grad_batches: 2  # Effective batch size = 32
+
+loss:
+  type: focal_loss  # Better for class imbalance
+  focal_gamma: 2.5  # Strong focus on difficult examples
+  use_class_weights: true
+
+  # CORRECTED 3-Class weights (alphabetical order)
+  # Classes detected: ['impassable', 'limited_passability', 'passable']
+  # Distribution: impassable(7%), limited(62%), passable(31%)
+  #
+  # Weight strategy:
+  # - impassable: 6.0 (CRITICAL - safety class, only 7% of data)
+  # - limited_passability: 1.0 (baseline - largest class 62%)
+  # - passable: 0.5 (reduce focus - 31% of data, was over-predicted in Run #3)
+  class_weights: [6.0, 1.0, 0.5]  # [impassable, limited_passability, passable]
+
+evaluation:
+  # Metrics to track
+  metrics:
+    - accuracy
+    - f1_score_macro
+    - cohen_kappa
+    - confusion_matrix
+    - per_class_precision
+    - per_class_recall
+
+  # Validation frequency
+  check_val_every_n_epoch: 1
+  val_check_interval: 1.0  # Check validation after every epoch
+
+callbacks:
+  # Model checkpointing
+  checkpoint:
+    monitor: val/f1  # Monitor macro F1 score
+    mode: max
+    save_top_k: 5  # Save top 5 best checkpoints
+    save_last: true
+    filename: 'epoch{epoch:02d}-valf1{val/f1:.4f}'
+
+  # Early stopping
+  early_stopping:
+    monitor: val/f1
+    patience: 15  # Increased patience
+    mode: max
+    min_delta: 0.001
+
+  # Learning rate monitoring
+  lr_monitor:
+    logging_interval: epoch
+
+logging:
+  # Logger type (wandb or tensorboard)
+  logger: tensorboard
+  project_name: uav-flood-assessment
+  experiment_name: efficientnet_b0_3class_fixed
+
+  # Logging frequency
+  log_every_n_steps: 10
+
+  # Log hyperparameters
+  log_hyperparameters: true
+
+  # Save directory
+  save_dir: ../logs
+
+# Hardware settings
+trainer:
+  accelerator: gpu  # Use GPU acceleration
+  devices: 1
+  precision: 16-mixed  # Use mixed precision for faster training
+  deterministic: false  # Set true for reproducibility (slower)
+
+# Reproducibility
+seed: 42
+
+# Paths
+paths:
+  checkpoint_dir: ../checkpoints
+  log_dir: ../logs
+  export_dir: ../exports

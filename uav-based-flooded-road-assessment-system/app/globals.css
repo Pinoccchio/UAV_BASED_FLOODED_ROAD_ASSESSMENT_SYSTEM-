@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+/* ===== FONTS ===== */
+@theme inline {
+  --font-display: var(--font-barlow);
+  --font-sans: var(--font-jakarta);
+  --font-mono: var(--font-jetbrains);
+
+  /* ===== COLOR SYSTEM ===== */
+  --color-background: oklch(0.10 0.015 245);
+  --color-foreground: oklch(0.95 0.01 245);
+  --color-card: oklch(0.13 0.018 245);
+  --color-card-foreground: oklch(0.92 0.01 245);
+  --color-popover: oklch(0.13 0.018 245);
+  --color-popover-foreground: oklch(0.92 0.01 245);
+
+  /* Primary — muted blue (professional) */
+  --color-primary: oklch(0.55 0.12 220);
+  --color-primary-foreground: oklch(0.95 0.01 245);
+
+  /* Secondary — muted navy */
+  --color-secondary: oklch(0.18 0.02 245);
+  --color-secondary-foreground: oklch(0.55 0.12 220);
+
+  --color-muted: oklch(0.16 0.015 245);
+  --color-muted-foreground: oklch(0.55 0.02 245);
+
+  --color-accent: oklch(0.18 0.025 200);
+  --color-accent-foreground: oklch(0.55 0.12 220);
+
+  --color-destructive: oklch(0.62 0.25 25);
+  --color-destructive-foreground: oklch(0.95 0.01 245);
+
+  --color-border: oklch(0.22 0.018 245);
+  --color-input: oklch(0.16 0.015 245);
+  --color-ring: oklch(0.55 0.12 220);
+
+  /* Radius */
+  --radius: 0.5rem;
+}
+
+/* ===== STATUS COLORS (desaturated for professionalism) ===== */
+:root {
+  --status-passable: oklch(0.62 0.15 145);
+  --status-limited: oklch(0.70 0.18 68);
+  --status-heavy: oklch(0.65 0.16 55);
+  --status-impassable: oklch(0.58 0.20 25);
+}
+
+/* ===== BASE STYLES ===== */
+* {
+  border-color: oklch(0.22 0.018 245);
+}
+
+body {
+  background-color: oklch(0.10 0.015 245);
+  color: oklch(0.95 0.01 245);
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Focus visible styles for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Remove focus outline when using mouse/touch */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ===== CUSTOM KEYFRAME ANIMATIONS (functional only) ===== */
+
+/* Fade in up for scroll-triggered entry */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Confidence bar fill (provides feedback) */
+@keyframes bar-fill {
+  0% { width: 0%; }
+  100% { width: var(--bar-width, 80%); }
+}
+
+/* ===== UTILITY CLASSES ===== */
+/* Removed decorative animation utilities (scan, ripple, grid-pulse, status-pulse) */
+
+/* ===== GLASS MORPHISM ===== */
+/* Removed - replaced with solid backgrounds for professional appearance */
+
+/* ===== ROAD GRID BACKGROUND ===== */
+.road-grid {
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ===== GLOW EFFECTS ===== */
+/* Removed - replaced with subtle shadows for professional appearance */
+
+/* ===== TYPOGRAPHY ===== */
+.font-display {
+  font-family: var(--font-barlow), 'Arial Narrow', sans-serif;
+}
+
+.font-mono {
+  font-family: var(--font-jetbrains), 'Courier New', monospace;
+}
+
+/* ===== SCAN LINE OVERLAY ===== */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    oklch(0 0 0 / 0.03) 2px,
+    oklch(0 0 0 / 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: oklch(0.10 0.015 245);
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.25 0.02 245);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.55 0.12 220 / 0.5);
+}
+
+/* ===== SELECTION ===== */
+::selection {
+  background: oklch(0.55 0.12 220 / 0.3);
+  color: oklch(0.95 0.01 245);
+}
+
+/* ===== LEAFLET OVERRIDES ===== */
+
+/* Hide default Leaflet attribution clutter */
+.leaflet-control-attribution {
+  background: rgba(13, 17, 30, 0.7) !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+  font-size: 9px !important;
+  backdrop-filter: blur(4px);
+}
+.leaflet-control-attribution a {
+  color: oklch(0.55 0.12 220 / 0.5) !important;
+}
+
+/* Dark-theme zoom controls */
+.leaflet-control-zoom a {
+  background: oklch(0.13 0.018 245 / 0.85) !important;
+  color: oklch(0.90 0.005 245 / 0.7) !important;
+  border-color: oklch(0.55 0.12 220 / 0.2) !important;
+  backdrop-filter: blur(6px);
+}
+.leaflet-control-zoom a:hover {
+  background: oklch(0.55 0.12 220 / 0.15) !important;
+  color: oklch(0.55 0.12 220) !important;
+}
+
+/* Suppress default blue marker (we use GeoJSON polylines only) */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  display: none !important;
+}
+
+/* Tooltip dark styling */
+.flood-map-tooltip {
+  background: oklch(0.13 0.018 245 / 0.9) !important;
+  border: 1px solid oklch(0.55 0.12 220 / 0.25) !important;
+  color: oklch(0.90 0.005 245 / 0.85) !important;
+  font-family: monospace !important;
+  font-size: 10px !important;
+  border-radius: 4px !important;
+  padding: 3px 7px !important;
+  box-shadow: none !important;
+}
+.flood-map-tooltip::before {
+  display: none !important;
+}
+
+/* Flood map container */
+.flood-map-container .leaflet-container {
+  background: oklch(0.08 0.012 245) !important;
+}

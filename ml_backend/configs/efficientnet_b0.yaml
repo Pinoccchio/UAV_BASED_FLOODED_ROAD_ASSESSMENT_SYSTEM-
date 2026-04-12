@@ -1,0 +1,114 @@
+# EfficientNet-B0 Training Configuration
+# UAV Flood Passability Assessment
+
+model:
+  name: efficientnet_b0
+  num_classes: 4
+  pretrained: true
+  dropout: 0.3
+  freeze_backbone: true  # Start with frozen backbone (Phase 1)
+
+data:
+  data_dir: ../data/processed
+  img_size: [448, 448]
+  batch_size: 16  # Reduced from 32 for 4GB VRAM GPU
+  num_workers: 4
+  use_weighted_sampling: true
+  pin_memory: true
+
+training:
+  # Phase 1: Train classifier head only (2-3 epochs)
+  phase1_epochs: 3
+  phase1_lr: 0.001
+
+  # Phase 2: Fine-tune last 2 blocks (5-10 epochs)
+  phase2_epochs: 10
+  phase2_lr: 0.0001
+  phase2_unfreeze_blocks: 2
+
+  # Phase 3: Full fine-tuning (10-15 epochs)
+  phase3_epochs: 15
+  phase3_lr: 0.00005
+
+  # Optimizer
+  optimizer: adamw
+  weight_decay: 0.0001
+  scheduler: cosine_annealing
+
+  # Training settings
+  max_epochs: 30  # Total across all phases
+  warmup_epochs: 3
+  gradient_clip_val: 1.0
+  accumulate_grad_batches: 1
+
+loss:
+  type: focal_loss  # or cross_entropy
+  focal_gamma: 2.0
+  use_class_weights: true
+  # Class weights will be computed automatically from dataset
+  # Manual override (optional): [0.5, 1.5, 2.0, 1.5]
+
+evaluation:
+  # Metrics to track
+  metrics:
+    - accuracy
+    - f1_score_macro
+    - cohen_kappa
+    - confusion_matrix
+    - per_class_precision
+    - per_class_recall
+
+  # Validation frequency
+  check_val_every_n_epoch: 1
+  val_check_interval: 1.0  # Check validation after every epoch
+
+callbacks:
+  # Model checkpointing
+  checkpoint:
+    monitor: val/f1  # Monitor macro F1 score
+    mode: max
+    save_top_k: 3
+    save_last: true
+    filename: 'epoch{epoch:02d}-valf1{val/f1:.4f}'
+
+  # Early stopping
+  early_stopping:
+    monitor: val/f1
+    patience: 8
+    mode: max
+    min_delta: 0.001
+
+  # Learning rate monitoring
+  lr_monitor:
+    logging_interval: epoch
+
+logging:
+  # Logger type (wandb or tensorboard)
+  logger: tensorboard
+  project_name: uav-flood-assessment
+  experiment_name: efficientnet_b0_baseline
+
+  # Logging frequency
+  log_every_n_steps: 10
+
+  # Log hyperparameters
+  log_hyperparameters: true
+
+  # Save directory
+  save_dir: ../logs
+
+# Hardware settings
+trainer:
+  accelerator: gpu  # Use GPU acceleration
+  devices: 1
+  precision: 16-mixed  # Use mixed precision for faster training (2x speedup)
+  deterministic: false  # Set true for reproducibility (slower)
+
+# Reproducibility
+seed: 42
+
+# Paths
+paths:
+  checkpoint_dir: ../checkpoints
+  log_dir: ../logs
+  export_dir: ../exports
