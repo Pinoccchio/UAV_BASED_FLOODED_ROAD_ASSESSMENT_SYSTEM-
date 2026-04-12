@@ -45,3 +45,12 @@ ml_backend/venv/
 ml_backend/logs/
 ml_backend/checkpoints/
 ml_backend/exports/
+
+# local workspace / tooling
+.agents/
+.claude/
+Microsoft/
+docs/FINAL/
+
+# markdown docs
+*.md
