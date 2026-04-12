@@ -54,3 +54,6 @@ docs/FINAL/
 
 # markdown docs
 *.md
+
+# dataset note
+RescueNet-Segmentation-Dataset-Note.txt
