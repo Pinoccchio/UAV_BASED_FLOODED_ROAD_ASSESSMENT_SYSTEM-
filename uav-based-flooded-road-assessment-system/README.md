@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend
 
-## Getting Started
+This is the Next.js frontend for the UAV-Based Flooded Road Assessment System.
 
-First, run the development server:
+## Responsibilities
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Render the landing page and project sections
+- Accept image uploads for flood-road assessment
+- Display AI prediction results and vehicle recommendations
+- Show map-based visualization for sample and GPS-tagged imagery
+
+## Stack
+
+- Next.js 16
+- React 19
+- Tailwind CSS 4
+- Framer Motion
+- Leaflet / React Leaflet
+
+## Local Development
+
+Set the backend URL in `.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Run the development server:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open `http://localhost:3000` in the browser.
 
-## Learn More
+## Runtime Behavior
 
-To learn more about Next.js, take a look at the following resources:
+The frontend sends uploaded images directly to:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+${NEXT_PUBLIC_API_URL}/api/v1/predict
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The backend response is then rendered in the assessment demo UI.
 
-## Deploy on Vercel
+## Key Files
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `app/page.tsx` - page composition
+- `components/sections/AssessmentDemo.tsx` - upload and prediction flow
+- `components/map/FloodMap.tsx` - map rendering
+- `lib/constants.ts` - shared frontend classification constants
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+- Frontend: Vercel
+- Backend target: Render-hosted FastAPI API
